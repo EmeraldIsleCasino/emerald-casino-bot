@@ -8,7 +8,16 @@ const {
 } = require("discord.js");
 const fs = require("fs");
 const path = require("path");
+const http = require("http");
 const { initializeDatabases } = require("./database");
+
+// Start HTTP server IMMEDIATELY for Render port detection
+const PORT = process.env.PORT || 10000;
+http.createServer((req, res) => {
+  res.writeHead(200, { 'Content-Type': 'text/plain' });
+  res.end('OK');
+}).listen(PORT, '0.0.0.0');
+console.log(`[HTTP] Server started on port ${PORT}`);
 
 const client = new Client({
   intents: [
@@ -85,15 +94,6 @@ async function main() {
 
   if (!token) {
     console.error("[Error] DISCORD_BOT_TOKEN not found");
-    console.log("[Info] Please set the DISCORD_BOT_TOKEN secret in Replit");
-    console.log(
-      "[Info] 1. Go to Discord Developer Portal: https://discord.com/developers/applications",
-    );
-    console.log("[Info] 2. Create or select your application");
-    console.log("[Info] 3. Go to Bot section and copy the token");
-    console.log(
-      "[Info] 4. Add it as a secret named DISCORD_BOT_TOKEN in Replit",
-    );
     process.exit(1);
   }
 
