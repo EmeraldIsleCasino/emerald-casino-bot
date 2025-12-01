@@ -98,13 +98,7 @@ async function main() {
     process.exit(1);
   }
 
-  console.log("[Database] Initializing databases...");
-  initializeDatabases();
-
-  console.log("[Bot] Deploying commands...");
-  await deployCommands();
-
-  // Start HTTP server for Render health checks
+  // Start HTTP server FIRST for Render health checks (port scan happens immediately)
   const PORT = process.env.PORT || 3000;
   http.createServer((req, res) => {
     res.writeHead(200, { 'Content-Type': 'application/json' });
@@ -112,6 +106,12 @@ async function main() {
   }).listen(PORT, '0.0.0.0', () => {
     console.log(`[HTTP] Server listening on port ${PORT}`);
   });
+
+  console.log("[Database] Initializing databases...");
+  initializeDatabases();
+
+  console.log("[Bot] Deploying commands...");
+  await deployCommands();
 
   console.log("[Bot] Logging in...");
   await client.login(token);
