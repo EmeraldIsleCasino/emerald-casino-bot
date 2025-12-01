@@ -86,37 +86,29 @@ async function main() {
 
   if (!token) {
     console.error("[Error] DISCORD_BOT_TOKEN not found");
-    console.log("[Info] Please set the DISCORD_BOT_TOKEN secret in Replit");
-    console.log(
-      "[Info] 1. Go to Discord Developer Portal: https://discord.com/developers/applications",
-    );
-    console.log("[Info] 2. Create or select your application");
-    console.log("[Info] 3. Go to Bot section and copy the token");
-    console.log(
-      "[Info] 4. Add it as a secret named DISCORD_BOT_TOKEN in Replit",
-    );
     process.exit(1);
   }
 
-  // Start HTTP server FIRST for Render health checks
+  // Start HTTP server FIRST for Render health checks (must be before async operations)
   const PORT = process.env.PORT || 3000;
-  http.createServer((req, res) => {
-    res.writeHead(200, { 'Content-Type': 'application/json' });
-    res.end(JSON.stringify({ status: 'ok', bot: 'Emerald Isle Casino' }));
-  }).listen(PORT, '0.0.0.0');
-  console.log(`[HTTP] Server listening on port ${PORT}`);
+  await new Promise((resolve) => {
+    http.createServer((req, res) => {
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ status: 'ok', bot: 'Emerald Isle Casino' }));
+    }).listen(PORT, '0.0.0.0', () => {
+      console.log(`[HTTP] Server listening on port ${PORT}`);
+      resolve();
+    });
+  });
 
   console.log("[Database] Initializing databases...");
   initializeDatabases();
 
+  console.log("[Bot] Deploying commands...");
+  await deployCommands();
+
   console.log("[Bot] Logging in...");
   await client.login(token);
-
-  // Deploy commands in background after login
-  client.once('ready', async () => {
-    console.log("[Bot] Deploying commands...");
-    await deployCommands();
-  });
 }
 
 main().catch((error) => {
