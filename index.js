@@ -11,6 +11,14 @@ const path = require("path");
 const http = require("http");
 const { initializeDatabases } = require("./database");
 
+// Start HTTP server IMMEDIATELY for Render port detection
+const PORT = process.env.PORT || 10000;
+http.createServer((req, res) => {
+  res.writeHead(200, { 'Content-Type': 'text/plain' });
+  res.end('OK');
+}).listen(PORT, '0.0.0.0');
+console.log(`[HTTP] Server started on port ${PORT}`);
+
 const client = new Client({
   intents: [
     GatewayIntentBits.Guilds,
@@ -88,15 +96,6 @@ async function main() {
     console.error("[Error] DISCORD_BOT_TOKEN not found");
     process.exit(1);
   }
-
-  // Start minimal HTTP server for Render health checks
-  const PORT = process.env.PORT || 3000;
-  http.createServer((req, res) => {
-    res.writeHead(200, { 'Content-Type': 'text/plain' });
-    res.end('OK');
-  }).listen(PORT, '0.0.0.0', () => {
-    console.log(`[HTTP] Health check server listening on port ${PORT}`);
-  });
 
   console.log("[Database] Initializing databases...");
   initializeDatabases();
