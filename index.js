@@ -8,7 +8,6 @@ const {
 } = require("discord.js");
 const fs = require("fs");
 const path = require("path");
-const http = require("http");
 const { initializeDatabases } = require("./database");
 
 const client = new Client({
@@ -88,18 +87,6 @@ async function main() {
     console.error("[Error] DISCORD_BOT_TOKEN not found");
     process.exit(1);
   }
-
-  // Start HTTP server FIRST for Render health checks (must be before async operations)
-  const PORT = process.env.PORT || 3000;
-  await new Promise((resolve) => {
-    http.createServer((req, res) => {
-      res.writeHead(200, { 'Content-Type': 'application/json' });
-      res.end(JSON.stringify({ status: 'ok', bot: 'Emerald Isle Casino' }));
-    }).listen(PORT, '0.0.0.0', () => {
-      console.log(`[HTTP] Server listening on port ${PORT}`);
-      resolve();
-    });
-  });
 
   console.log("[Database] Initializing databases...");
   initializeDatabases();
